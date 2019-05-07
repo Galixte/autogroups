@@ -11,7 +11,7 @@
 
 namespace phpbb\autogroups\tests\event;
 
-class event_listener_test extends \phpbb_test_case
+class listener_test extends \phpbb_test_case
 {
 	/** @var \phpbb\autogroups\event\listener */
 	protected $listener;
@@ -50,8 +50,11 @@ class event_listener_test extends \phpbb_test_case
 			'core.user_setup',
 			'core.submit_post_end',
 			'core.delete_posts_after',
+			'core.approve_posts_after',
 			'core.mcp_warn_post_after',
 			'core.mcp_warn_user_after',
+			'core.session_create_after',
+			'core.user_add_after',
 		), array_keys(\phpbb\autogroups\event\listener::getSubscribedEvents()));
 	}
 
@@ -170,6 +173,18 @@ class event_listener_test extends \phpbb_test_case
 				),
 			),
 			array(
+				'phpbb.autogroups.type.posts',
+				'approve_post_check',
+				'core.approve_posts_after',
+				'post_info',
+				array(
+					array('post_id' => 1, 'poster_id' => 100),
+					array('post_id' => 2, 'poster_id' => 200),
+					array('post_id' => 3, 'poster_id' => 300),
+				),
+				array('users' => array(100, 200, 300)),
+			),
+			array(
 				'phpbb.autogroups.type.warnings',
 				'add_warning_check',
 				'core.mcp_warn_post_after',
@@ -184,6 +199,22 @@ class event_listener_test extends \phpbb_test_case
 				'user_row',
 				array('user_id' => '$poster_ids'),
 				array('users' => '$poster_ids'),
+			),
+			array(
+				'phpbb.autogroups.type.lastvisit',
+				'last_visit_check',
+				'core.session_create_after',
+				'session_data',
+				array('session_user_id' => '$user_id'),
+				array('users' => '$user_id'),
+			),
+			array(
+				'phpbb.autogroups.type.membership',
+				'membership_check',
+				'core.user_add_after',
+				'user_id',
+				array('user_id' => 100),
+				array('users' => array('user_id' => 100)),
 			),
 		);
 	}

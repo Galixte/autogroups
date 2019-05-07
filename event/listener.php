@@ -47,10 +47,17 @@ class listener implements EventSubscriberInterface
 			// Auto Groups "Posts" listeners
 			'core.submit_post_end'		=> 'submit_post_check',
 			'core.delete_posts_after'	=> 'delete_post_check',
+			'core.approve_posts_after'	=> 'approve_post_check',
 
 			// Auto Groups "Warnings" listeners
 			'core.mcp_warn_post_after'	=> 'add_warning_check',
 			'core.mcp_warn_user_after'	=> 'add_warning_check',
+
+			// Auto Gorups "Last Visit" listeners
+			'core.session_create_after'	=> 'last_visit_check',
+
+			// Auto Groups "Membership" listeners
+			'core.user_add_after'		=> 'membership_check',
 		);
 	}
 
@@ -113,6 +120,20 @@ class listener implements EventSubscriberInterface
 	}
 
 	/**
+	 * Check user's post count after approving a post for auto groups
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function approve_post_check($event)
+	{
+		$this->manager->check_condition('phpbb.autogroups.type.posts', array(
+			'users'		=> array_column($event['post_info'], 'poster_id'),
+		));
+	}
+
+	/**
 	 * Check user's warnings count after receiving a warning for auto groups
 	 *
 	 * @param \phpbb\event\data $event The event object
@@ -123,6 +144,34 @@ class listener implements EventSubscriberInterface
 	{
 		$this->manager->check_condition('phpbb.autogroups.type.warnings', array(
 			'users'		=> $event['user_row']['user_id'],
+		));
+	}
+
+	/**
+	 * Check user's last visit status when they log in
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function last_visit_check($event)
+	{
+		$this->manager->check_condition('phpbb.autogroups.type.lastvisit', array(
+			'users'		=> $event['session_data']['session_user_id'],
+		));
+	}
+
+	/**
+	 * Check membership after user registration
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function membership_check($event)
+	{
+		$this->manager->check_condition('phpbb.autogroups.type.membership', array(
+			'users'		=> $event['user_id'],
 		));
 	}
 }
